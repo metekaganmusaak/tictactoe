@@ -11,23 +11,46 @@ class DatabaseService extends GetxService {
     await supabase.from('rooms').insert(room.toJson());
   }
 
-  Future<void> finishGame(String roomId) async {
+  Future<void> deleteGameRoom(String roomId) async {
     await supabase.from('rooms').delete().eq('id', roomId);
   }
 
-  updateMovesByRoomId(String roomId, List<String> moves) async {
+  Future<void> updateMovesByRoomId(String roomId, List<dynamic> moves) async {
     await supabase.from('rooms').update({
       'moves': moves,
     }).eq('id', roomId);
   }
 
-  Future<List<dynamic>> getMoves(String roomId) async {
+  Future<void> updateCurrentMoveByRoomId(String roomId,
+      {required int currentMove}) async {
+    await supabase.from('rooms').update({
+      'current_move': currentMove,
+    }).eq('id', roomId);
+  }
+
+  Future<void> updateWinnerName(String roomId, String winnerName) async {
+    await supabase.from('rooms').update({
+      'winner_name': winnerName,
+    }).eq('id', roomId);
+  }
+
+  Future<void> updateIsFinished(String roomId, bool isGameFinished) async {
+    await supabase.from('rooms').update({
+      'is_finished': isGameFinished,
+    }).eq('id', roomId);
+  }
+
+  Future<List<Map<String, dynamic>>> getMoves(String roomId) async {
     final response = await supabase.from('rooms').select('moves').eq(
           'id',
           roomId,
         );
 
-    return response.first['moves'] as List<dynamic>;
+    return response;
+  }
+
+  SupabaseStreamBuilder listenRoomChanges(String roomId) {
+    return supabase.from('rooms').stream(primaryKey: ['id']).eq('id', roomId);
   }
 
   SupabaseStreamBuilder fetchAllRooms() {

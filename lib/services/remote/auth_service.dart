@@ -8,6 +8,7 @@ abstract class IAuthService {
   Future<AuthService> init();
   Future<Result<bool, String>> signOut();
   Future<Result<bool, String>> saveUsername({required String name});
+  String? getUsername();
 }
 
 class AuthService extends GetxService implements IAuthService {
@@ -53,6 +54,19 @@ class AuthService extends GetxService implements IAuthService {
       return const Ok(true);
     } catch (e) {
       return Err(e.toString());
+    }
+  }
+
+  @override
+  String? getUsername() {
+    try {
+      final username = currentUser?.userMetadata?['name'] as String?;
+      if (username == null) {
+        return null;
+      }
+      return username;
+    } catch (e) {
+      return null;
     }
   }
 }

@@ -55,7 +55,7 @@ enum GameLevel {
       case GameLevel.hard:
         return 5;
       default:
-        return 0;
+        return -1;
     }
   }
 }
@@ -105,6 +105,7 @@ class RoomModel {
   final DateTime createdAt = DateTime.now();
   final int level;
   final List<String> moves;
+  final int currentMove;
 
   RoomModel({
     required this.id,
@@ -115,7 +116,8 @@ class RoomModel {
     this.winnerName,
     required this.backgroundColor,
     this.level = 0,
-    this.moves = const [],
+    required this.moves,
+    required this.currentMove,
   });
 
   factory RoomModel.fromJson(Map<String, dynamic> json) {
@@ -129,6 +131,7 @@ class RoomModel {
       backgroundColor: json['background_color'],
       level: json['level'],
       moves: List<String>.from(json['moves']),
+      currentMove: json['current_move'],
     );
   }
 
@@ -143,7 +146,8 @@ class RoomModel {
       'background_color': backgroundColor,
       'created_at': createdAt.toIso8601String(),
       'level': level,
-      'moves': moves
+      'moves': moves,
+      'current_move': currentMove,
     };
   }
 
@@ -158,6 +162,7 @@ class RoomModel {
     DateTime? createdAt,
     int? level,
     List<String>? moves,
+    int? currentMove,
   }) {
     return RoomModel(
       id: id ?? this.id,
@@ -169,12 +174,13 @@ class RoomModel {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       level: level ?? this.level,
       moves: moves ?? this.moves,
+      currentMove: currentMove ?? this.currentMove,
     );
   }
 
   @override
   String toString() {
-    return 'RoomModel(id: $id, title: $title, player1Uid: $player1Name, player2Uid: $player2Name, isFinished: $isFinished, winnerName: $winnerName, backgroundColor: $backgroundColor, createdAt: $createdAt, level: $level, moves: $moves)';
+    return 'RoomModel(id: $id, title: $title, player1Uid: $player1Name, player2Uid: $player2Name, isFinished: $isFinished, winnerName: $winnerName, backgroundColor: $backgroundColor, createdAt: $createdAt, level: $level, moves: $moves, currentMove: $currentMove)';
   }
 
   @override

@@ -35,6 +35,7 @@ class CreateGameController extends GetxController {
         GameLevel.values[selectedLevelIndex.value].boardSize *
             GameLevel.values[selectedLevelIndex.value].boardSize,
         " ",
+        growable: false,
       );
 
       final room = RoomModel(
@@ -47,6 +48,9 @@ class CreateGameController extends GetxController {
         player2Name: null,
         winnerName: null,
         moves: squares,
+
+        /// Current move is defines with index of moves. 0 means first user. (Player X)
+        currentMove: 0,
       );
 
       await Get.find<DatabaseService>().createRoom(room);

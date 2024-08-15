@@ -64,8 +64,11 @@ class HomeView extends GetView<HomeController> {
                       child: CircularProgressIndicator(),
                     );
                   } else if (rooms.isEmpty) {
-                    return const Center(
-                      child: Text('No rooms available'),
+                    return Center(
+                      child: Text(
+                        'There are no available rooms',
+                        style: Theme.of(context).textTheme.bodyLarge,
+                      ),
                     );
                   } else {
                     return ListView.separated(
