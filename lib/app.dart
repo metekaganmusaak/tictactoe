@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tictactoe/services/core/navigation_service.dart';
+import 'package:tictactoe/services/core/theme_service.dart';
 import 'package:tictactoe/views/controller_bindings.dart';
 
 class App extends StatelessWidget {
@@ -12,7 +13,7 @@ class App extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialBinding: ControllerBindings(),
       getPages: NavigationService.pages,
-      theme: ThemeData.dark(),
+      theme: ThemeService.theme,
     );
   }
 }

@@ -65,175 +65,177 @@ class GameView extends GetView<GameController> {
         backgroundColor:
             BackgroundColor.values[controller.room.backgroundColor].color,
       ),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-          stream: controller.gameStream(),
-          builder: (context, snapshot) {
-            final data = snapshot.data ?? [];
-            final game =
-                data.isNotEmpty ? RoomModel.fromJson(data.first) : null;
+      body: Obx(() {
+        final winnerName = controller.winnerName.value;
+        return StreamBuilder<List<Map<String, dynamic>>>(
+            stream: controller.gameStream(),
+            builder: (context, snapshot) {
+              final data = snapshot.data ?? [];
+              final game =
+                  data.isNotEmpty ? RoomModel.fromJson(data.first) : null;
 
-            if (game == null) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+              if (game == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-            if (controller.winnerName.value != null) {
-              return Dialog(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: Gap.l,
-                    horizontal: Gap.xl,
+              if (winnerName == 'X' || winnerName == 'O' || winnerName == 'D') {
+                return Dialog(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: Gap.l,
+                      horizontal: Gap.xl,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (controller.winnerName.value == 'X' ||
+                            controller.winnerName.value == 'O') ...[
+                          Text(
+                            '${controller.winnerName.value} is the winner!',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: Gap.m),
+                          const Text(
+                            'Game room will be deleted in 3 seconds. Please wait...',
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                        if (controller.winnerName.value == 'D') ...[
+                          Text(
+                            'DRAW',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: Gap.m),
+                          const Text(
+                            'Game will be restarted in 3 seconds. Please wait...',
+                            textAlign: TextAlign.center,
+                          ),
+                        ]
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (controller.winnerName.value != 'Draw') ...[
-                        Text(
-                          // TODO: look at here
-                          controller.winnerName.value!,
-                          style: Theme.of(context).textTheme.titleLarge,
+                );
+              }
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(Gap.l),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Player X',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: Palette.black,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                game.player1Name ==
+                                        Get.find<AuthService>().getUsername()
+                                    ? '(You)'
+                                    : '(Opponent)',
+                                style: const TextStyle(color: Palette.black),
+                              ),
+                            ],
+                          ),
                         ),
-                        const SizedBox(height: Gap.m),
-                        const Text(
-                          'Game room will be deleted in 3 seconds. Please wait...',
-                          textAlign: TextAlign.center,
+                        Expanded(
+                          child: Column(
+                            children: [
+                              const Text(
+                                'Player O',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  color: Palette.black,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              Text(
+                                game.player2Name ==
+                                        Get.find<AuthService>().getUsername()
+                                    ? '(You)'
+                                    : '(Opponent)',
+                                style: const TextStyle(color: Palette.black),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
-                      if (controller.winnerName.value == 'Draw') ...[
-                        Text(
-                          // TODO: look at here
-
-                          controller.winnerName.value!.toUpperCase(),
-                          style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: Gap.m),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PlayerWidget(
+                            avatar:
+                                controller.userFirstLetters(game.player1Name),
+                            username: game.player1Name,
+                            isRoomOwner: true,
+                            moveTurn:
+                                controller.turn.value == GameMoveTurn.player1,
+                          ),
                         ),
-                        const SizedBox(height: Gap.m),
-                        const Text(
-                          'Game will be restarted in 3 seconds. Please wait...',
-                          textAlign: TextAlign.center,
+                        Expanded(
+                          child: PlayerWidget(
+                            avatar: controller.userFirstLetters(
+                              game.player2Name ?? 'Anonymous',
+                            ),
+                            username: game.player2Name ?? 'Anonymous',
+                            isRoomOwner: false,
+                            moveTurn:
+                                controller.turn.value == GameMoveTurn.player2,
+                          ),
                         ),
-                      ]
-                    ],
-                  ),
+                      ],
+                    ),
+                    const SizedBox(height: Gap.xl),
+                    GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: GameLevel.values[game.level].boardSize,
+                        mainAxisSpacing: 4,
+                        crossAxisSpacing: 4,
+                      ),
+                      itemCount: GameLevel.values[game.level].boardSize *
+                          GameLevel.values[game.level].boardSize,
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        return GestureDetector(
+                          onTap: () async {
+                            await controller.makeMove(index);
+                          },
+                          child: Container(
+                            color: Palette.white.withOpacity(0.5),
+                            child: Center(
+                              child: Text(
+                                game.moves[index],
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: game.moves[index] == 'X'
+                                      ? Palette.green
+                                      : Palette.red,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               );
-            }
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(Gap.l),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Player X',
-                              style: TextStyle(
-                                fontSize: 24,
-                                color: Palette.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              game.player1Name ==
-                                      Get.find<AuthService>().getUsername()
-                                  ? '(You)'
-                                  : '(Opponent)',
-                              style: const TextStyle(color: Palette.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Text(
-                              'Player O',
-                              style: TextStyle(
-                                fontSize: 24,
-                                color: Palette.black,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            Text(
-                              game.player2Name ==
-                                      Get.find<AuthService>().getUsername()
-                                  ? '(You)'
-                                  : '(Opponent)',
-                              style: const TextStyle(color: Palette.black),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Gap.m),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PlayerWidget(
-                          avatar: controller.userFirstLetters(game.player1Name),
-                          username: game.player1Name,
-                          isRoomOwner: true,
-                          moveTurn:
-                              controller.turn.value == GameMoveTurn.player1,
-                        ),
-                      ),
-                      Expanded(
-                        child: PlayerWidget(
-                          avatar: controller.userFirstLetters(
-                            game.player2Name ?? 'Anonymous',
-                          ),
-                          username: game.player2Name ?? 'Anonymous',
-                          isRoomOwner: false,
-                          moveTurn:
-                              controller.turn.value == GameMoveTurn.player2,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: Gap.xl),
-                  GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: GameLevel.values[game.level].boardSize,
-                      mainAxisSpacing: 4,
-                      crossAxisSpacing: 4,
-                    ),
-                    itemCount: GameLevel.values[game.level].boardSize *
-                        GameLevel.values[game.level].boardSize,
-                    shrinkWrap: true,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () async {
-                          await controller.makeMove(index);
-                        },
-                        child: Container(
-                          color: Palette.white.withOpacity(0.5),
-                          child: Center(
-                            child: Text(
-                              game.moves[index],
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: game.moves[index] == 'X'
-                                    ? Palette.green
-                                    : Palette.red,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          }),
+            });
+      }),
     );
   }
 }

@@ -28,7 +28,7 @@ class DatabaseService extends GetxService {
     }).eq('id', roomId);
   }
 
-  Future<void> updateWinnerName(String roomId, String winnerName) async {
+  Future<void> updateWinnerName(String roomId, String? winnerName) async {
     await supabase.from('rooms').update({
       'winner_name': winnerName,
     }).eq('id', roomId);

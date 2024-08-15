@@ -83,10 +83,9 @@ class HomeView extends GetView<HomeController> {
                         return RoomWidget(
                           room: roomModel,
                           onTap: () async {
-                            if (roomModel.player1Name == controller.username ||
-                                (roomModel.player2Name != null &&
-                                    roomModel.player2Name ==
-                                        controller.username)) {
+                            /// You are room owner. So you can join the room.
+                            if (roomModel.player1Name ==
+                                controller.currentUsername) {
                               Get.toNamed(
                                 Routes.game,
                                 arguments: roomModel,
@@ -94,13 +93,35 @@ class HomeView extends GetView<HomeController> {
                               return;
                             }
 
-                            await controller.updateRoomParticipant(
-                              roomModel.id,
-                            );
+                            /// You are not room owner. If player 2 seat is empty, you can join.
+                            if (roomModel.player2Name == null) {
+                              await controller.updateRoomParticipant(
+                                roomModel.id,
+                              );
 
-                            Get.toNamed(
-                              Routes.game,
-                              arguments: roomModel,
+                              Get.toNamed(
+                                Routes.game,
+                                arguments: roomModel,
+                              );
+                              return;
+                            }
+
+                            /// You are not room owner and player 2 seat is already yours.
+                            if (roomModel.player2Name ==
+                                controller.currentUsername) {
+                              Get.toNamed(
+                                Routes.game,
+                                arguments: roomModel,
+                              );
+                              return;
+                            }
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'You can not join this room! All seats are taken.',
+                                ),
+                              ),
                             );
                           },
                         );

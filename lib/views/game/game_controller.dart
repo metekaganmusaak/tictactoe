@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tictactoe/models/room_model.dart';
 import 'package:tictactoe/services/remote/auth_service.dart';
@@ -16,10 +16,12 @@ class GameController extends GetxController {
   final room = Get.arguments as RoomModel;
 
   Rx<GameMoveTurn> turn = GameMoveTurn.player1.obs;
-  RxnString winnerName = RxnString("");
-  RxBool isRoomDeleted = false.obs;
+  RxnString winnerName = RxnString(null);
+  RxBool isGameFinished = false.obs;
 
   StreamSubscription? roomChangesSubscription;
+
+  final _audioPlayer = AudioPlayer();
 
   @override
   onInit() {
@@ -39,21 +41,34 @@ class GameController extends GetxController {
       (data) async {
         if (data.isEmpty) return;
 
-        turn.value = GameMoveTurn.values[data.first['current_move'] ?? 0];
-        winnerName.value = data.first['winner_name'] ?? "";
-        isRoomDeleted.value = data.first['is_finished'] ?? false;
+        print('Listening data: $data');
 
-        if (isRoomDeleted.value) {
-          await const Duration(seconds: 3).delay();
+        turn.value = GameMoveTurn.values[data.first['current_move'] ?? 0];
+        winnerName.value = data.first['winner_name'];
+        isGameFinished.value = data.first['is_finished'] ?? false;
+
+        if ((winnerName.value == 'X' || winnerName.value == 'O') &&
+            isGameFinished.value) {
+          _audioPlayer.play(AssetSource('sound_fx/win.mp3'));
+          await deleteGameRoom();
           Get.back();
+          return;
+        }
+
+        if ((isGameFinished.value == false && winnerName.value == 'D') &&
+            !isGameFinished.value) {
+          _audioPlayer.play(AssetSource('sound_fx/draw.mp3'));
+          await restartGame();
+          return;
         }
 
         if (winnerName.value == null) {
-          await restartGame();
+          print('continue game');
+          return;
         }
       },
       onError: (error) {
-        Get.back();
+        print('Error while listening game changes: $error');
       },
     );
   }
@@ -65,6 +80,8 @@ class GameController extends GetxController {
 
   Future<void> restartGame() async {
     await const Duration(seconds: 3).delay();
+
+    /// Clear board
     await Get.find<DatabaseService>().updateMovesByRoomId(
         room.id,
         List.filled(
@@ -73,11 +90,15 @@ class GameController extends GetxController {
           " ",
           growable: false,
         ));
+
+    /// Reset current move
     await Get.find<DatabaseService>().updateCurrentMoveByRoomId(
       room.id,
       currentMove: 0,
     );
-    await _updateWinnerName(room.id, "", false);
+
+    /// Reset winner name
+    await _updateWinnerName(room.id, null);
   }
 
   bool get isPlayer1 =>
@@ -103,31 +124,30 @@ class GameController extends GetxController {
 
     final result = checkWinner(moves, boardSize);
 
+    /// Game is still continue or never started.
     if (result == null) {
       return;
     }
 
     if (result == 'X' || result == 'O') {
-      await _updateWinnerName(room.id, isPlayer1 ? 'X' : 'O', true);
-      await deleteGameRoom();
+      await _updateWinnerName(room.id, result);
+      await Get.find<DatabaseService>().updateIsFinished(room.id, true);
+
       return;
     }
 
     if (result == 'D') {
-      await restartGame();
+      await _updateWinnerName(room.id, 'D');
+      await Get.find<DatabaseService>().updateIsFinished(room.id, false);
       return;
     }
   }
 
   Future<void> _updateWinnerName(
     String roomId,
-    String result,
-    bool isGameFinished,
+    String? winner,
   ) async {
-    await Get.find<DatabaseService>().updateWinnerName(room.id, result);
-
-    /// After that we will delete the game room automatically.
-    await Get.find<DatabaseService>().updateIsFinished(room.id, isGameFinished);
+    await Get.find<DatabaseService>().updateWinnerName(room.id, winner);
   }
 
   Future<List<dynamic>> _getMoves() async {
@@ -145,7 +165,16 @@ class GameController extends GetxController {
   }
 
   Future<void> _updateMove(List<dynamic> moves, int index) async {
+    if (turn.value == GameMoveTurn.player1) {
+      _audioPlayer.play(AssetSource('sound_fx/player_x.mp3'));
+    }
+
+    if (turn.value == GameMoveTurn.player2) {
+      _audioPlayer.play(AssetSource('sound_fx/player_o.mp3'));
+    }
+
     moves[index] = turn.value == GameMoveTurn.player1 ? 'X' : 'O';
+
     await Get.find<DatabaseService>().updateMovesByRoomId(room.id, moves);
   }
 
@@ -160,7 +189,7 @@ class GameController extends GetxController {
     List<List<String>> board = _createBoard(moves, size);
 
     String? winner = _checkLines(board, size);
-    print('Winner = $winner');
+
     if (winner != null &&
         (winner.toUpperCase() == 'X' || winner.toUpperCase() == 'O')) {
       /// Return X or O

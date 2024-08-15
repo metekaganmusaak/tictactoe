@@ -55,12 +55,12 @@ class HomeController extends GetxController {
     return Get.find<DatabaseService>().fetchAllRooms();
   }
 
-  String get username => Get.find<AuthService>().getUsername() ?? '';
+  String get currentUsername => Get.find<AuthService>().getUsername() ?? '';
 
   Future<void> updateRoomParticipant(String roomId) async {
     await Get.find<DatabaseService>().updateRoomParticipant(
       roomId,
-      username: username,
+      username: currentUsername,
     );
   }
 }
