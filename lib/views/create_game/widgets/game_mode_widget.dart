@@ -21,10 +21,10 @@ class GameModeWidget extends StatelessWidget {
       },
       child: Obx(() {
         return Container(
-          padding: const EdgeInsets.all(Gap.l),
-          margin: const EdgeInsets.symmetric(horizontal: Gap.xs),
+          padding: EdgeInsets.all(Gap.l.px),
+          margin: EdgeInsets.symmetric(horizontal: Gap.xs.px),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(Gap.l),
+            borderRadius: BorderRadius.circular(Gap.l.px),
             border: Border.all(color: Theme.of(context).primaryColor),
             color: Get.find<CreateGameController>().selectedLevelIndex.value ==
                     level.value

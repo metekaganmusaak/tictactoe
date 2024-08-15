@@ -13,36 +13,38 @@ class Routes {
   static const String game = '/game';
 }
 
+/// The reason we created this enum is to store all the pages in one place.
+/// This way we can easily access the pages and their properties. And also
+/// we will reduce boilerplate code in the [NavigationService.pages] list.
 enum Pages {
   home(
     route: Routes.home,
-    title: 'Home',
     view: HomeView(),
   ),
   createGame(
     route: Routes.createGame,
-    title: 'Create Game',
     view: CreateGameView(),
   ),
   game(
     route: Routes.game,
-    title: 'Game',
     view: GameView(),
   );
 
   final String route;
-  final String title;
   final Widget view;
 
-  const Pages({required this.route, required this.title, required this.view});
+  const Pages({required this.route, required this.view});
 }
 
 class NavigationService {
+  const NavigationService._();
+
+  /// We defined static list of pages here to use in GetMaterialApp getPages property
+  /// which is a feature thats comes with Getx package.
   static List<GetPage> pages = [
     for (final page in Pages.values)
       GetPage(
         name: page.route,
-        title: page.title,
         curve: Curves.easeInOut,
         transition: Transition.rightToLeftWithFade,
         transitionDuration: kThemeAnimationDuration,

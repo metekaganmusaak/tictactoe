@@ -20,41 +20,6 @@ class GameView extends GetView<GameController> {
             icon: const Icon(Icons.arrow_back, color: Palette.black),
             onPressed: () {
               Get.back();
-              // showDialog(
-              //     context: context,
-              //     builder: (context) {
-              //       return AlertDialog(
-              //         title: const Text('Leave Game'),
-              //         content: const Text(
-              //           'Do you want to leave the game? If you leave, you will lose the game.',
-              //         ),
-              //         actions: [
-              //           TextButton(
-              //             onPressed: () async {
-              //               Get.close(2);
-              //               final result = await controller.finishGame();
-
-              //               if (result.isErr()) {
-              //                 Get.snackbar(
-              //                   'Error',
-              //                   result.unwrapErr(),
-              //                   backgroundColor: Palette.red,
-              //                   colorText: Palette.white,
-              //                 );
-              //                 return;
-              //               }
-              //             },
-              //             child: const Text('Yes'),
-              //           ),
-              //           TextButton(
-              //             onPressed: () {
-              //               Get.back();
-              //             },
-              //             child: const Text('No'),
-              //           ),
-              //         ],
-              //       );
-              //     });
             }),
         title: Text(
           controller.room.title,
@@ -83,9 +48,9 @@ class GameView extends GetView<GameController> {
               if (winnerName == 'X' || winnerName == 'O' || winnerName == 'D') {
                 return Dialog(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: Gap.l,
-                      horizontal: Gap.xl,
+                    padding: EdgeInsets.symmetric(
+                      vertical: Gap.l.px,
+                      horizontal: Gap.xl.px,
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +63,7 @@ class GameView extends GetView<GameController> {
                             '${controller.winnerName.value} is the winner!',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          const SizedBox(height: Gap.m),
+                          SizedBox(height: Gap.m.px),
                           const Text(
                             'Game room will be deleted in 3 seconds. Please wait...',
                             textAlign: TextAlign.center,
@@ -109,7 +74,7 @@ class GameView extends GetView<GameController> {
                             'DRAW',
                             style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          const SizedBox(height: Gap.m),
+                          SizedBox(height: Gap.m.px),
                           const Text(
                             'Game will be restarted in 3 seconds. Please wait...',
                             textAlign: TextAlign.center,
@@ -122,7 +87,7 @@ class GameView extends GetView<GameController> {
               }
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.all(Gap.l),
+                padding: EdgeInsets.all(Gap.l.px),
                 child: Column(
                   children: [
                     Row(
@@ -172,7 +137,7 @@ class GameView extends GetView<GameController> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: Gap.m),
+                    SizedBox(height: Gap.m.px),
                     Row(
                       children: [
                         Expanded(
@@ -198,7 +163,7 @@ class GameView extends GetView<GameController> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: Gap.xl),
+                    SizedBox(height: Gap.xl.px),
                     GridView.builder(
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: GameLevel.values[game.level].boardSize,

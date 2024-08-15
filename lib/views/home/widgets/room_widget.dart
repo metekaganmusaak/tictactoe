@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tictactoe/core/constants/gap.dart';
 import 'package:tictactoe/core/constants/palette.dart';
 import 'package:tictactoe/models/room_model.dart';
+import 'package:tictactoe/services/core/localization_service.dart';
 
 class RoomWidget extends StatelessWidget {
   const RoomWidget({
@@ -17,10 +18,10 @@ class RoomWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(Gap.l),
+      padding: EdgeInsets.all(Gap.l.px),
       decoration: BoxDecoration(
         color: BackgroundColor.values[room.backgroundColor].color,
-        borderRadius: BorderRadius.circular(Gap.m),
+        borderRadius: BorderRadius.circular(Gap.m.px),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -37,9 +38,9 @@ class RoomWidget extends StatelessWidget {
                         color: Palette.black,
                       ),
                 ),
-                const SizedBox(height: Gap.m),
+                SizedBox(height: Gap.m.px),
                 Text(
-                  'Game Mode: ${GameLevel.values[room.level].name} - ${GameLevel.values[room.level].boardType}',
+                  '${GameLevel.values[room.level].name} - ${GameLevel.values[room.level].boardType}',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: Palette.black,
                       ),
@@ -49,7 +50,7 @@ class RoomWidget extends StatelessWidget {
           ),
           FilledButton.icon(
             onPressed: room.isFinished ? null : onTap,
-            label: const Text('Start'),
+            label: Text(Tr.join.tr),
             icon: const Icon(Icons.play_arrow),
             style: FilledButton.styleFrom(
               foregroundColor: Palette.black,

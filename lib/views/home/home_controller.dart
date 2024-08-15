@@ -8,34 +8,43 @@ import 'package:tictactoe/services/remote/auth_service.dart';
 import 'package:tictactoe/services/remote/database_service.dart';
 
 class HomeController extends GetxController {
-  RxBool showEnterNamePopup = false.obs;
-
-  late final TextEditingController nameController;
-
+  late final TextEditingController? nameController;
   late final RealtimeChannel roomsSubscription;
+
+  RxBool showEnterName = false.obs;
+
+  String get currentUsername => Get.find<AuthService>().getUsername() ?? '';
 
   @override
   void onInit() {
     super.onInit();
-    nameController = TextEditingController();
-    final username = Get.find<AuthService>().currentUser?.userMetadata?['name'];
-
-    if (username == null) {
-      showEnterNamePopup.value = true;
+    // If user doesn't have a username, show enter name view.
+    if (currentUsername.isEmpty) {
+      nameController = TextEditingController();
+      showEnterName.value = true;
     }
   }
 
   @override
   void onClose() {
-    nameController.dispose();
-
+    nameController?.dispose();
     super.onClose();
   }
 
   Future<Result<bool, String>> saveUsername() async {
     try {
-      final result =
-          await Get.find<AuthService>().saveUsername(name: nameController.text);
+      final username = nameController?.text;
+
+      if (username == null) {
+        return const Err('Something went wrong!');
+      }
+
+      if (username.isEmpty) {
+        return const Err('Username can not be empty.');
+      }
+
+      final result = await Get.find<AuthService>()
+          .saveUsername(name: nameController!.text);
 
       if (result.isErr()) {
         final error = result.unwrapErr();
@@ -44,7 +53,7 @@ class HomeController extends GetxController {
         return Err(error);
       }
 
-      showEnterNamePopup.value = false;
+      showEnterName.value = false;
       return const Ok(true);
     } catch (e) {
       return Err(e.toString());
@@ -52,10 +61,14 @@ class HomeController extends GetxController {
   }
 
   SupabaseStreamBuilder fetchAllRooms() {
-    return Get.find<DatabaseService>().fetchAllRooms();
-  }
+    final streamResult = Get.find<DatabaseService>().fetchAllRooms();
 
-  String get currentUsername => Get.find<AuthService>().getUsername() ?? '';
+    if (streamResult.isErr()) {
+      // Handle error
+    }
+
+    return streamResult.unwrap();
+  }
 
   Future<void> updateRoomParticipant(String roomId) async {
     await Get.find<DatabaseService>().updateRoomParticipant(

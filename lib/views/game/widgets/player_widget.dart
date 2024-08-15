@@ -35,7 +35,7 @@ class PlayerWidget extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: Gap.m),
+        SizedBox(height: Gap.m.px),
         Text(
           username,
           style: const TextStyle(color: Palette.black),

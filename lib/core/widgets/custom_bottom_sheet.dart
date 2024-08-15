@@ -12,9 +12,9 @@ class CustomBottomSheet extends StatelessWidget {
       height: MediaQuery.sizeOf(context).height * 0.8,
       width: double.infinity,
       child: Material(
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(Gap.l),
-          topRight: Radius.circular(Gap.l),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(Gap.l.px),
+          topRight: Radius.circular(Gap.l.px),
         ),
         child: SingleChildScrollView(child: body),
       ),

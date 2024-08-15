@@ -11,10 +11,10 @@ class ParticipantWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 150,
-      padding: const EdgeInsets.all(Gap.l),
-      margin: const EdgeInsets.symmetric(horizontal: Gap.m),
+      padding: EdgeInsets.all(Gap.l.px),
+      margin: EdgeInsets.symmetric(horizontal: Gap.m.px),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(Gap.l),
+        borderRadius: BorderRadius.circular(Gap.l.px),
         color: isGameCreator ? Palette.green : Palette.red,
       ),
       child: Stack(

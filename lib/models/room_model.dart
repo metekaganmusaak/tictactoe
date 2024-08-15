@@ -36,11 +36,11 @@ enum GameLevel {
   String get boardType {
     switch (this) {
       case GameLevel.easy:
-        return '3x3';
+        return '3 x 3';
       case GameLevel.medium:
-        return '4x4';
+        return '4 x 4';
       case GameLevel.hard:
-        return '5x5';
+        return '5 x 5';
       default:
         return 'Unknown level';
     }

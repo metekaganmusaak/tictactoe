@@ -4,6 +4,7 @@ import 'package:tictactoe/core/constants/gap.dart';
 import 'package:tictactoe/core/constants/palette.dart';
 import 'package:tictactoe/core/extensions/focus_unfocus_on_tap.dart';
 import 'package:tictactoe/models/room_model.dart';
+import 'package:tictactoe/services/core/localization_service.dart';
 import 'package:tictactoe/views/create_game/create_game_controller.dart';
 import 'package:tictactoe/views/create_game/widgets/game_mode_widget.dart';
 import 'package:tictactoe/views/create_game/widgets/participant_widget.dart';
@@ -14,7 +15,7 @@ class CreateGameView extends GetView<CreateGameController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Game')),
+      appBar: AppBar(title: Text(Tr.createGame.tr)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await controller.createRoom();
@@ -23,37 +24,37 @@ class CreateGameView extends GetView<CreateGameController> {
             Get.back();
           }
         },
-        label: const Text('Create'),
+        label: Text(Tr.create.tr),
         icon: const Icon(Icons.create),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(Gap.l),
+        padding: EdgeInsets.all(Gap.l.px),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Room Name',
+              Tr.roomName.tr,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: Gap.m),
+            SizedBox(height: Gap.m.px),
             Obx(() {
               return TextField(
                 controller: controller.roomNameController,
                 onChanged: (value) => controller.errorText.value = '',
                 decoration: InputDecoration(
-                  hintText: 'eg: My Room',
+                  hintText: Tr.roomNameHint.tr,
                   errorText: controller.errorText.isEmpty
                       ? null
                       : controller.errorText.value,
                 ),
               );
             }),
-            const SizedBox(height: Gap.xl),
+            SizedBox(height: Gap.xl.px),
             Text(
-              'Game Color',
+              Tr.gameColor.tr,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: Gap.m),
+            SizedBox(height: Gap.m.px),
             Wrap(
               children: [
                 ...BackgroundColor.values.map((bg) {
@@ -62,12 +63,12 @@ class CreateGameView extends GetView<CreateGameController> {
                       controller.selectedColor.value = bg;
                     },
                     child: Container(
-                      margin: const EdgeInsets.only(right: Gap.m),
+                      margin: EdgeInsets.only(right: Gap.m.px),
                       width: 50,
                       height: 50,
                       decoration: BoxDecoration(
                         color: bg.color,
-                        borderRadius: BorderRadius.circular(Gap.m),
+                        borderRadius: BorderRadius.circular(Gap.m.px),
                       ),
                       child: Center(
                         child: Obx(() {
@@ -84,12 +85,12 @@ class CreateGameView extends GetView<CreateGameController> {
                 }),
               ],
             ),
-            const SizedBox(height: Gap.xl),
+            SizedBox(height: Gap.xl.px),
             Text(
-              'Game Mode',
+              Tr.gameMode.tr,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: Gap.m),
+            SizedBox(height: Gap.m.px),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -98,12 +99,12 @@ class CreateGameView extends GetView<CreateGameController> {
                 }),
               ],
             ),
-            const SizedBox(height: Gap.xl),
+            SizedBox(height: Gap.xl.px),
             Text(
-              'Participants',
+              Tr.participants.tr,
               style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: Gap.m),
+            SizedBox(height: Gap.m.px),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -115,7 +116,7 @@ class CreateGameView extends GetView<CreateGameController> {
                 const Expanded(child: ParticipantWidget(isGameCreator: false)),
               ],
             ),
-            const SizedBox(height: Gap.xl),
+            SizedBox(height: Gap.xl.px),
           ],
         ),
       ),

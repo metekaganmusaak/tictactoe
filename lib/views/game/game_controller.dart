@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:get/get.dart';
@@ -36,12 +37,20 @@ class GameController extends GetxController {
   }
 
   Future<void> listenGameChanges() async {
-    roomChangesSubscription =
-        Get.find<DatabaseService>().listenRoomChanges(room.id).listen(
+    final subscriptionResult =
+        Get.find<DatabaseService>().listenRoomChanges(room.id);
+
+    if (subscriptionResult.isErr()) {
+      final error = subscriptionResult.unwrapErr();
+      log('Error while listening game changes: $error');
+      return;
+    }
+
+    final subscription = subscriptionResult.unwrap();
+
+    roomChangesSubscription = subscription.listen(
       (data) async {
         if (data.isEmpty) return;
-
-        print('Listening data: $data');
 
         turn.value = GameMoveTurn.values[data.first['current_move'] ?? 0];
         winnerName.value = data.first['winner_name'];
@@ -63,19 +72,16 @@ class GameController extends GetxController {
         }
 
         if (winnerName.value == null) {
-          print('continue game');
           return;
         }
       },
-      onError: (error) {
-        print('Error while listening game changes: $error');
-      },
+      onError: (error) {},
     );
   }
 
   Future<void> deleteGameRoom() async {
     await const Duration(seconds: 3).delay();
-    await Get.find<DatabaseService>().deleteGameRoom(room.id);
+    await Get.find<DatabaseService>().deleteRoom(room.id);
   }
 
   Future<void> restartGame() async {
@@ -105,7 +111,12 @@ class GameController extends GetxController {
       room.player1Name == Get.find<AuthService>().getUsername();
 
   SupabaseStreamBuilder gameStream() {
-    return Get.find<DatabaseService>().listenRoomById(room.id);
+    final subscriptionResult =
+        Get.find<DatabaseService>().listenRoomChanges(room.id);
+
+    if (subscriptionResult.isErr()) {}
+
+    return subscriptionResult.unwrap();
   }
 
   String userFirstLetters(String name) {
@@ -151,8 +162,15 @@ class GameController extends GetxController {
   }
 
   Future<List<dynamic>> _getMoves() async {
-    return (await Get.find<DatabaseService>().getMoves(room.id)).first['moves']
-        as List<dynamic>;
+    final movesResult = await Get.find<DatabaseService>().getMoves(room.id);
+
+    if (movesResult.isErr()) {
+      return [];
+    }
+
+    final moves = movesResult.unwrap();
+
+    return moves.first['moves'] as List<dynamic>;
   }
 
   bool _isValidMove(List<dynamic> moves, int index) {
@@ -165,13 +183,9 @@ class GameController extends GetxController {
   }
 
   Future<void> _updateMove(List<dynamic> moves, int index) async {
-    if (turn.value == GameMoveTurn.player1) {
-      _audioPlayer.play(AssetSource('sound_fx/player_x.mp3'));
-    }
-
-    if (turn.value == GameMoveTurn.player2) {
-      _audioPlayer.play(AssetSource('sound_fx/player_o.mp3'));
-    }
+    turn.value == GameMoveTurn.player1
+        ? _audioPlayer.play(AssetSource('sound_fx/player_x.mp3'))
+        : _audioPlayer.play(AssetSource('sound_fx/player_o.mp3'));
 
     moves[index] = turn.value == GameMoveTurn.player1 ? 'X' : 'O';
 
