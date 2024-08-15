@@ -12,19 +12,17 @@ abstract class IAuthService {
 }
 
 class AuthService extends GetxService implements IAuthService {
-  final SupabaseClient client = Supabase.instance.client;
-  late final User? currentUser;
+  final SupabaseClient _client = Supabase.instance.client;
+  User? get currentUser => _client.auth.currentUser;
 
   @override
   Future<AuthService> init() async {
     try {
-      if (client.auth.currentUser == null) {
-        await client.auth.signInAnonymously();
-        currentUser = client.auth.currentUser;
+      if (_client.auth.currentUser == null) {
+        await _client.auth.signInAnonymously();
         return this;
       }
 
-      currentUser = client.auth.currentUser;
       return this;
     } catch (e) {
       log(e.toString(), name: 'AuthService.init()');
@@ -35,7 +33,7 @@ class AuthService extends GetxService implements IAuthService {
   @override
   Future<Result<bool, String>> signOut() async {
     try {
-      await client.auth.signOut();
+      await _client.auth.signOut();
       return const Ok(true);
     } catch (e) {
       return Err(e.toString());
@@ -45,7 +43,7 @@ class AuthService extends GetxService implements IAuthService {
   @override
   Future<Result<bool, String>> saveUsername({required String name}) async {
     try {
-      await client.auth.updateUser(
+      await _client.auth.updateUser(
         UserAttributes(data: {
           'name': name,
         }),
